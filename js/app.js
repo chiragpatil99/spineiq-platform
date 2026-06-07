@@ -98,21 +98,27 @@ async function genReport() {
 
   btn.disabled    = true;
   btn.textContent = 'Generating…';
-  out.innerHTML   = `
-  <div class="gen-loading">
-    <div class="spinner"></div>
-    Analysing patient data and generating evidence-based clinical report…
-  </div>`;
+
+  // Wake up the Render server first (free tier spins down after inactivity)
+  out.innerHTML = `<div class="gen-loading"><div class="spinner"></div>Waking up server — this may take up to 30 seconds on first use…</div>`;
+  try { await fetch(API_PROXY_URL.replace('/api/generate-report', ''), { method: 'GET' }); } catch(e) {}
+
+  out.innerHTML = `<div class="gen-loading"><div class="spinner"></div>Analysing patient data and generating evidence-based clinical report…</div>`;
 
   const sc = score();
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000); // 90 second timeout
+
     const response = await fetch(API_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildReportPrompt(sc) })
+      body: JSON.stringify({ prompt: buildReportPrompt(sc) }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeout);
     const data = await response.json();
 
     if (!response.ok) {
@@ -124,7 +130,7 @@ async function genReport() {
   } catch (err) {
     console.error('SpineIQ report generation error:', err);
     out.innerHTML = `<div class="report-box" style="color:var(--red)">
-      Report generation failed. Please check your connection and try again.
+      Report generation failed. Please try clicking Regenerate Report — the server may still be waking up.
     </div>`;
   }
 
