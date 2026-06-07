@@ -9,7 +9,6 @@
 </head>
 <body>
 
-<!-- TOP NAVIGATION -->
 <nav class="topnav">
   <div class="brand">
     <div class="brand-icon">
@@ -22,9 +21,9 @@
   </div>
   <div class="nav-pills">
     <button class="nav-pill active">Assessment</button>
-    <button class="nav-pill">Reports</button>
-    <button class="nav-pill">Analytics</button>
-    <button class="nav-pill">Settings</button>
+    <button class="nav-pill" onclick="showComingSoon('Reports')">Reports</button>
+    <button class="nav-pill" onclick="showComingSoon('Analytics')">Analytics</button>
+    <button class="nav-pill" onclick="showComingSoon('Settings')">Settings</button>
   </div>
   <div class="nav-right">
     <div class="badge-phase">PHASE 1</div>
@@ -32,10 +31,10 @@
   </div>
 </nav>
 
-<!-- LAYOUT -->
-<div class="layout">
+<!-- Coming Soon Toast -->
+<div id="toast" style="display:none;position:fixed;top:80px;right:24px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:12px 20px;border-radius:var(--r);font-size:14px;z-index:999;box-shadow:0 8px 24px #0006"></div>
 
-  <!-- SIDEBAR -->
+<div class="layout">
   <nav class="sidebar">
     <div class="sidebar-section-label">Assessment Flow</div>
     <button class="sitem active" data-s="0" onclick="goStep(0)"><span class="step-num">1</span>Patient Information</button>
@@ -44,28 +43,35 @@
     <button class="sitem" data-s="3" onclick="goStep(3)"><span class="step-num">4</span>Lifestyle</button>
     <button class="sitem" data-s="4" onclick="goStep(4)"><span class="step-num">5</span>Health Data</button>
     <button class="sitem" data-s="5" onclick="goStep(5)"><span class="step-num">6</span>Pain Assessment</button>
-    <button class="sitem" data-s="6" onclick="goStep(6)"><span class="step-num">7</span>Functional Status</button>
-    <button class="sitem" data-s="7" onclick="goStep(7)"><span class="step-num">8</span>Risk Report</button>
+    <button class="sitem" data-s="6" onclick="goStep(6)"><span class="step-num">7</span>Radiculopathy & ODI</button>
+    <button class="sitem" data-s="7" onclick="goStep(7)"><span class="step-num">8</span>Red Flag Screening</button>
+    <button class="sitem" data-s="8" onclick="goStep(8)"><span class="step-num">9</span>Functional Status</button>
+    <button class="sitem" data-s="9" onclick="goStep(9)"><span class="step-num">10</span>Risk Report</button>
     <div class="sidebar-section-label">System</div>
-    <button class="sitem"><span class="step-num si-icon">◈</span>Patient Records</button>
-    <button class="sitem"><span class="step-num si-icon">◈</span>Analytics</button>
+    <button class="sitem" onclick="showComingSoon('Patient Records')"><span class="step-num si-icon">◈</span>Patient Records</button>
+    <button class="sitem" onclick="showComingSoon('Analytics')"><span class="step-num si-icon">◈</span>Analytics</button>
     <div class="sidebar-progress">
       <div class="sp-head">
         <span class="sp-label">Assessment progress</span>
-        <span class="sp-pct" id="sp-pct">12%</span>
+        <span class="sp-pct" id="sp-pct">10%</span>
       </div>
-      <div class="sp-track"><div class="sp-fill" id="sp-fill" style="width:12%"></div></div>
+      <div class="sp-track"><div class="sp-fill" id="sp-fill" style="width:10%"></div></div>
     </div>
   </nav>
-
-  <!-- MAIN CONTENT -->
   <main class="main" id="main"></main>
-
 </div>
 
 <script src="js/data.js"></script>
 <script src="js/scoring.js"></script>
 <script src="js/pages.js"></script>
 <script src="js/app.js"></script>
+<script>
+function showComingSoon(name) {
+  const toast = document.getElementById('toast');
+  toast.textContent = `${name} — Coming in Phase 2 🚀`;
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 2500);
+}
+</script>
 </body>
 </html>
