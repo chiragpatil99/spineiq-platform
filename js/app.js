@@ -85,6 +85,11 @@ function checkSitting() {
     : '';
 }
 
+// ── CONFIG ────────────────────────────────────────────────────────
+// Backend proxy URL — update this after deploying the backend to Render
+const API_PROXY_URL = 'https://spineiq-backend.onrender.com/api/generate-report';
+
+
 // ── AI REPORT GENERATION ──────────────────────────────────────────
 async function genReport() {
   const btn = document.getElementById('gbtn');
@@ -102,29 +107,24 @@ async function genReport() {
   const sc = score();
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(API_PROXY_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': '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',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        messages:   [{ role: 'user', content: buildReportPrompt(sc) }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildReportPrompt(sc) })
     });
 
     const data = await response.json();
-    const text = data.content?.map(b => b.text || '').join('') || 'Report generation failed.';
-    out.innerHTML = `<div class="report-box">${text}</div>`;
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Server error');
+    }
+
+    out.innerHTML = `<div class="report-box">${data.report}</div>`;
 
   } catch (err) {
     console.error('SpineIQ report generation error:', err);
     out.innerHTML = `<div class="report-box" style="color:var(--red)">
-      Connection error. Please check your internet connection and try again.
+      Report generation failed. Please check your connection and try again.
     </div>`;
   }
 
