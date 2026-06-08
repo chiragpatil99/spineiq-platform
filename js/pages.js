@@ -158,29 +158,49 @@ const PAGES = [
 
   // ── STEP 4: Health Data ────────────────────────────────────────
   () => {
-    const W=[{id:'manual',icon:'📋',name:'Manual Entry'},{id:'apple',icon:'⌚',name:'Apple Watch'},
-      {id:'fitbit',icon:'💚',name:'Fitbit'},{id:'samsung',icon:'📱',name:'Samsung'},
-      {id:'garmin',icon:'🏃',name:'Garmin'},{id:'xiaomi',icon:'🔴',name:'Mi Band'},
-      {id:'amazfit',icon:'🔵',name:'Amazfit'},{id:'oneplus',icon:'🟢',name:'OnePlus'},
-      {id:'googlefit',icon:'🔷',name:'Google Fit'},{id:'other',icon:'◉',name:'Other'}];
-    const sel=W.find(x=>x.id===D.hd.src);
+    const W=[{id:'manual',icon:'📋',name:'Manual Entry'},{id:'googlefit',icon:'🔷',name:'Google Fit'},
+      {id:'apple',icon:'⌚',name:'Apple Watch'},{id:'fitbit',icon:'💚',name:'Fitbit'},
+      {id:'samsung',icon:'📱',name:'Samsung'},{id:'garmin',icon:'🏃',name:'Garmin'},
+      {id:'xiaomi',icon:'🔴',name:'Mi Band'},{id:'amazfit',icon:'🔵',name:'Amazfit'},
+      {id:'oneplus',icon:'🟢',name:'OnePlus'},{id:'other',icon:'◉',name:'Other'}];
+    const isConnected = !!googleAccessToken;
     return `
     <div class="step-hdr"><div class="step-title">Health & Fitness Data</div>
-    <div class="step-desc">Import from wearable or enter manually — wearable-agnostic architecture</div></div>
+    <div class="step-desc">Connect Google Fit for automatic sync or enter manually</div></div>
     <div class="card">
       <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Data source</div></div>
       <div class="wgrid">${W.map(w=>`<button class="wcard ${D.hd.src===w.id?'sel':''}" onclick="D.hd.src='${w.id}';render()">
         <div class="wcard-icon">${w.icon}</div>${w.name}</button>`).join('')}</div>
-      ${D.hd.src!=='manual'?`<div class="alert alert-info">ℹ <strong>Phase 2:</strong> Auto-sync from ${sel?.name} via OAuth health APIs. Enter manually for now.</div>`:''}
+      ${D.hd.src==='googlefit' ? `<div style="margin-top:14px">
+        ${!isConnected ? `
+        <div style="background:var(--blue-dim);border:1px solid #3B82F622;border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">🔷 Connect Google Fit</div>
+            <div style="font-size:12px;color:var(--text2)">Automatically import steps, sleep, heart rate and activity from the last 7 days</div>
+          </div>
+          <button onclick="connectGoogleFit()" style="padding:10px 20px;background:var(--blue);border:none;border-radius:var(--r);color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">
+            Connect Google Fit →
+          </button>
+        </div>` : `
+        <div style="background:var(--green-dim);border:1px solid #22C55E33;border-radius:var(--r);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div style="font-size:14px;color:var(--green)">✅ Google Fit connected</div>
+          <button id="gfit-sync-btn" onclick="syncGoogleFitData(()=>render())"
+            style="padding:8px 18px;background:var(--green);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif">
+            🔄 Sync data
+          </button>
+        </div>
+        <div id="gfit-status" style="margin-top:10px"></div>`}
+      </div>` : D.hd.src!=='manual' ? `<div class="alert alert-info" style="margin-top:12px">ℹ <strong>Coming in Phase 2:</strong> Auto-sync from this device. Please enter manually below.</div>` : ''}
     </div>
     <div class="card">
-      <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Health metrics</div></div>
+      <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Health metrics ${D.hd.src==='googlefit'&&isConnected ? '— synced from Google Fit' : '— manual entry'}</div></div>
       <div class="grid3">
-        ${[['steps','Daily steps','e.g. 8500'],['walkMin','Walking min','e.g. 45'],['exMin','Exercise min','e.g. 30'],
-           ['activeMin','Active min','e.g. 60'],['sedentary','Sedentary hours','e.g. 9'],['sleepDur','Sleep hours','e.g. 7.5'],
+        ${[['steps','Daily steps (avg)','e.g. 8500'],['walkMin','Walking min (avg)','e.g. 45'],['exMin','Exercise min (avg)','e.g. 30'],
+           ['activeMin','Active min (avg)','e.g. 60'],['sedentary','Sedentary hours','e.g. 9'],['sleepDur','Sleep hours (avg)','e.g. 7.5'],
            ['rhr','Resting HR (bpm)','e.g. 65'],['weight','Weight (kg)','e.g. 74']].map(([k,l,ph])=>`
         <div class="field"><label>${l}</label>
-        <input type="number" value="${D.hd[k]||''}" placeholder="${ph}" oninput="D.hd['${k}']=this.value"></div>`).join('')}
+        <input type="number" value="${D.hd[k]||''}" placeholder="${ph}" oninput="D.hd['${k}']=this.value"
+          style="${D.hd[k]&&D.hd.src==='googlefit'?'border-color:var(--green);background:var(--green-dim)':''}"></div>`).join('')}
         <div></div>
       </div>
     </div>`;
