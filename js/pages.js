@@ -1,4 +1,55 @@
 /**
+ * Video gate helper — tracks which videos have been watched
+ */
+const watchedVideos = {};
+
+function markWatched(id) {
+  watchedVideos[id] = true;
+  const gate = document.getElementById('video-gate-' + id);
+  const form = document.getElementById('video-form-' + id);
+  const btn  = document.getElementById('video-watched-btn-' + id);
+  if (gate) gate.style.opacity = '1';
+  if (btn)  btn.innerHTML = '✅ Video watched — form unlocked';
+  if (btn)  btn.style.background = 'var(--green)';
+  if (form) { form.style.pointerEvents = 'auto'; form.style.opacity = '1'; }
+}
+
+function videoGate(id, title, duration, desc) {
+  const watched = watchedVideos[id];
+  return `
+  <div class="card" style="margin-bottom:12px;border-color:${watched ? 'var(--green)33' : 'var(--purple2)33'};background:${watched ? 'var(--green-dim)' : 'var(--purple-dim)'}">
+    <div class="card-hdr">
+      <div class="card-dot" style="background:${watched ? 'var(--green)' : 'var(--purple2)'}"></div>
+      <div class="card-label" style="color:${watched ? 'var(--green)' : 'var(--purple2)'}">
+        ${watched ? '✅ Video watched' : '📹 Watch before continuing'}
+      </div>
+    </div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${title}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">${desc}</div>
+    <!-- Video placeholder -->
+    <div id="video-gate-${id}" style="position:relative;border-radius:var(--r);overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px;opacity:${watched ? '1' : '0.95'}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#1a1040,#0a1520)">
+        <div style="width:56px;height:56px;background:var(--purple2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="markWatched('${id}')">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div style="color:#fff;font-size:13px;font-weight:500">${title}</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:11px">${duration} · Tap to play</div>
+      </div>
+      <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px">${duration}</div>
+    </div>
+    <button id="video-watched-btn-${id}"
+      onclick="markWatched('${id}')"
+      style="width:100%;padding:11px;border-radius:var(--r);border:none;
+        background:${watched ? 'var(--green)' : 'var(--purple2)'};
+        color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+        transition:all .15s">
+      ${watched ? '✅ Video watched — form unlocked' : '▶ Mark as watched to unlock form'}
+    </button>
+  </div>
+  <div id="video-form-${id}" style="pointer-events:${watched ? 'auto' : 'none'};opacity:${watched ? '1' : '0.35'};transition:all .3s">`;
+}
+
+/**
  * SpineIQ — Page Templates v2.0
  * 10-step assessment incorporating SSS clinical scoring system,
  * ODI disability assessment, red flag screening, and age-specific benchmarks.
@@ -269,6 +320,7 @@ const PAGES = [
     <div class="field"><label>Functional limitations</label>
     <input type="text" value="${D.pa.limitations}" placeholder="e.g. cannot sit more than 20 minutes" oninput="D.pa.limitations=this.value"></div>
     ${D.pa.radiation==='leg'||D.pa.radiation==='foot'?`<div class="alert alert-danger">⚠ Pain radiating below the knee may indicate nerve root involvement. Complete the Radiculopathy section on the next step.</div>`:''}
+  </div>
   </div>`,
 
   // ── STEP 6: Radiculopathy + ODI ───────────────────────────────
@@ -278,6 +330,11 @@ const PAGES = [
     return `
     <div class="step-hdr"><div class="step-title">Radiculopathy & Disability</div>
     <div class="step-desc">Leg symptom severity (SSS Section 2) and Modified ODI disability scoring (SSS Section 3)</div></div>
+    ${videoGate('odi',
+      'Understanding Nerve Pain & Daily Disability',
+      '2:45',
+      'Learn the difference between nerve pain and muscle pain, what radiculopathy means, and how to honestly rate your ability to perform daily activities.'
+    )}
     <div class="card">
       <div class="card-hdr"><div class="card-dot" style="background:var(--red)"></div><div class="card-label">Leg radiculopathy / sciatica severity (0–3)</div></div>
       <div class="field"><label>Select severity grade</label>
@@ -326,6 +383,11 @@ const PAGES = [
     return `
     <div class="step-hdr"><div class="step-title">Red Flag Screening</div>
     <div class="step-desc">SSS Section 6 — Tick if present. Any red flag automatically sets SSS score to 11 (urgent).</div></div>
+    ${videoGate('redflag',
+      'Understanding Red Flags in Back Pain',
+      '3:00',
+      'Some back pain symptoms require urgent medical attention. This video explains each red flag warning sign in plain language so you can answer accurately and safely.'
+    )}
     <div class="card">
       <div class="card-hdr"><div class="card-dot" style="background:var(--red)"></div><div class="card-label">Red flag indicators</div></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -339,6 +401,7 @@ const PAGES = [
       ${anyFlag?`<div class="alert alert-danger" style="margin-top:16px">
         ⚠ <strong>RED FLAG PRESENT — SSS Score automatically = 11.</strong> Urgent spine specialist evaluation required. Do not delay.
       </div>`:`<div class="alert alert-info" style="margin-top:16px">✓ No red flags selected — continue with standard assessment.</div>`}
+    </div>
     </div>`;
   },
 
