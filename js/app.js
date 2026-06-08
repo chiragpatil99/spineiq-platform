@@ -26,9 +26,16 @@ function render() {
 
 function goStep(n) { currentStep = n; function downloadReport() {
   const reportText = document.getElementById('rout')?.innerText || '';
-  const sc = score();
+  const sc  = score();
   const sss = calcSSS();
-  if (!reportText) return;
+  if (!reportText) { alert('Please generate the AI report first before downloading.'); return; }
+
+  const sssBg  = sss.total <= 3 ? '#e8f5ee' : sss.total <= 6 ? '#fdf3e3' : sss.total <= 9 ? '#2d1a00' : '#fceef0';
+  const sssCol = sss.total <= 3 ? '#2D6A4F' : sss.total <= 6 ? '#92520A' : sss.total <= 9 ? '#C2541A' : '#8B2635';
+  const bmiBackground = !D.p.bmi ? '#f5f5f5' : parseFloat(D.p.bmi) < 25 ? '#e8f5ee' : parseFloat(D.p.bmi) < 30 ? '#fdf3e3' : '#fceef0';
+  const bmiTextCol    = !D.p.bmi ? '#666'    : parseFloat(D.p.bmi) < 25 ? '#2D6A4F' : parseFloat(D.p.bmi) < 30 ? '#92520A' : '#8B2635';
+  const riskBg  = sc.risk < 35 ? '#e8f5ee' : sc.risk < 65 ? '#fdf3e3' : '#fceef0';
+  const riskCol = sc.risk < 35 ? '#2D6A4F' : sc.risk < 65 ? '#92520A' : '#8B2635';
 
   const html = `<!DOCTYPE html>
 <html>
@@ -36,73 +43,131 @@ function goStep(n) { currentStep = n; function downloadReport() {
 <meta charset="UTF-8">
 <title>SpineIQ Clinical Report — ${D.p.name || 'Patient'}</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
-  h1 { color: #4A3F8F; font-size: 22px; border-bottom: 2px solid #4A3F8F; padding-bottom: 8px; }
-  h2 { color: #4A3F8F; font-size: 16px; margin-top: 24px; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-  .brand { font-size: 24px; font-weight: bold; color: #4A3F8F; }
-  .meta { font-size: 13px; color: #666; text-align: right; }
-  .scores { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin: 20px 0; }
-  .score-box { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 8px; padding: 10px; text-align: center; }
-  .score-val { font-size: 22px; font-weight: bold; color: #4A3F8F; }
-  .score-lbl { font-size: 11px; color: #666; margin-top: 2px; }
-  .sss-box { background: ${sss.bg.replace('var(--green-dim)','#e8f5ee').replace('var(--amber-dim)','#fdf3e3').replace('var(--red-dim)','#fceef0')}; border-radius: 10px; padding: 16px 20px; margin: 16px 0; display: flex; justify-content: space-between; align-items: center; }
-  .sss-score { font-size: 40px; font-weight: bold; }
-  .sss-level { font-size: 16px; font-weight: bold; padding: 8px 20px; border-radius: 20px; background: #4A3F8F; color: #fff; }
-  .report-body { white-space: pre-wrap; line-height: 1.8; font-size: 14px; margin-top: 20px; }
-  .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Arial', sans-serif; background: #fff; color: #1a1a1a; }
+  .page { max-width: 780px; margin: 0 auto; padding: 32px 36px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #4A3F8F; }
+  .brand-name { font-size: 26px; font-weight: 800; color: #4A3F8F; letter-spacing: -0.5px; }
+  .brand-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+  .meta table { font-size: 13px; color: #444; border-collapse: collapse; }
+  .meta td { padding: 2px 6px; }
+  .meta td:first-child { color: #888; font-weight: normal; text-align: right; }
+  .meta td:last-child  { font-weight: 600; color: #1a1a1a; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #888; margin: 24px 0 10px; }
+  .scores-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 16px; }
+  .score-box   { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .score-val   { font-size: 24px; font-weight: 800; color: #4A3F8F; line-height: 1; }
+  .score-lbl   { font-size: 11px; color: #888; margin-top: 4px; }
+  .sss-box { border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; background: ${sssBg}; border: 1px solid ${sssCol}44; }
+  .sss-num  { font-size: 46px; font-weight: 800; color: ${sssCol}; line-height: 1; }
+  .sss-sub  { font-size: 11px; color: ${sssCol}; opacity: .7; margin-top: 2px; }
+  .sss-badge { background: ${sssCol}; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 14px; margin-bottom: 6px; display: inline-block; }
+  .sss-mgmt  { font-size: 12px; color: ${sssCol}; text-align: right; }
+  .risk-box { border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: ${riskBg}; border: 1px solid ${riskCol}44; }
+  .risk-num  { font-size: 36px; font-weight: 800; color: ${riskCol}; }
+  .risk-badge { background: ${riskCol}; color: #fff; padding: 6px 16px; border-radius: 16px; font-weight: 700; font-size: 13px; }
+  .sss-breakdown { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 16px; }
+  .sss-item { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 8px; text-align: center; }
+  .sss-item-val { font-size: 18px; font-weight: 700; color: #4A3F8F; }
+  .sss-item-lbl { font-size: 10px; color: #888; margin-top: 2px; }
+  .patient-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+  .patient-cell { background: #f8f8f8; border-radius: 8px; padding: 10px 12px; }
+  .patient-cell .lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .patient-cell .val { font-size: 14px; font-weight: 600; }
+  .report-body { font-size: 13.5px; line-height: 1.9; color: #2a2a2a; white-space: pre-wrap; margin-top: 8px; }
+  .footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #eee; font-size: 11px; color: #aaa; text-align: center; line-height: 1.6; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 20px; }
+  }
 </style>
 </head>
 <body>
-<div class="header">
-  <div>
-    <div class="brand">SpineIQ</div>
-    <div style="font-size:12px;color:#666">Spine Health Intelligence Platform</div>
-  </div>
-  <div class="meta">
-    <div><strong>Patient:</strong> ${D.p.name || '—'}</div>
-    <div><strong>Age:</strong> ${D.p.age || '—'} | <strong>BMI:</strong> ${D.p.bmi || '—'}</div>
-    <div><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</div>
-  </div>
-</div>
+<div class="page">
 
-<h2>Dimension Scores</h2>
-<div class="scores">
-  <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
-  <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
-  <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
-  <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
-  <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
-</div>
-
-<div class="sss-box">
-  <div>
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px">SSS Score</div>
-    <div class="sss-score">${sss.total}<span style="font-size:18px">/11</span></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-name">SpineIQ</div>
+      <div class="brand-sub">Spine Health Intelligence Platform — Clinical Assessment Report</div>
+    </div>
+    <div class="meta">
+      <table>
+        <tr><td>Patient</td><td>${D.p.name || '—'}</td></tr>
+        <tr><td>Age / Sex</td><td>${D.p.age || '—'} yrs / ${D.p.gender || '—'}</td></tr>
+        <tr><td>Date</td><td>${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</td></tr>
+        <tr><td>Occupation</td><td style="text-transform:capitalize">${D.oc.type || '—'}</td></tr>
+      </table>
+    </div>
   </div>
-  <div>
-    <div class="sss-level">${sss.level}</div>
-    <div style="font-size:12px;color:#666;margin-top:6px;text-align:right">${sss.mgmt}</div>
+
+  <!-- PATIENT SUMMARY -->
+  <div class="section-title">Patient Summary</div>
+  <div class="patient-grid">
+    <div class="patient-cell"><div class="lbl">Height</div><div class="val">${D.p.height || '—'} cm</div></div>
+    <div class="patient-cell"><div class="lbl">Weight</div><div class="val">${D.p.weight || '—'} kg</div></div>
+    <div class="patient-cell"><div class="lbl">BMI</div><div class="val" style="color:${bmiTextCol}">${D.p.bmi || '—'}</div></div>
+    <div class="patient-cell"><div class="lbl">Classification</div><div class="val" style="color:${bmiTextCol};font-size:12px">${bmiLbl(D.p.bmi) || '—'}</div></div>
   </div>
-</div>
 
-<h2>Clinical Report</h2>
-<div class="report-body">${reportText}</div>
+  <!-- SSS SCORE -->
+  <div class="section-title">Spine Severity Score (SSS)</div>
+  <div class="sss-breakdown">
+    <div class="sss-item"><div class="sss-item-val">${sss.vas}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">VAS Pain</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.radiculopathy}<span style="font-size:12px">/3</span></div><div class="sss-item-lbl">Radiculopathy</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.odi}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">ODI Disability</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.bmiScore}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">BMI Load</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.chronicity}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">Chronicity</div></div>
+  </div>
+  <div class="sss-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${sssCol};margin-bottom:4px;opacity:.8">Total SSS Score</div>
+      <div class="sss-num">${sss.total}<span style="font-size:20px">/11</span></div>
+      <div class="sss-sub">Clinical severity classification</div>
+    </div>
+    <div style="text-align:right">
+      <div class="sss-badge">${sss.level}</div>
+      <div class="sss-mgmt">${sss.mgmt}</div>
+    </div>
+  </div>
 
-<div class="footer">
-  Generated by SpineIQ — Spine Health Intelligence Platform | ${new Date().toLocaleString()}<br>
-  This report is for clinical decision support only. Not a substitute for clinical judgment.
+  <!-- DIMENSION SCORES -->
+  <div class="section-title">Lifestyle Dimension Scores (0–100)</div>
+  <div class="scores-grid">
+    <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
+    <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
+    <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
+    <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
+    <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
+  </div>
+
+  <!-- RISK SCORE -->
+  <div class="risk-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${riskCol};margin-bottom:4px;opacity:.8">Back Pain Risk Score</div>
+      <div class="risk-num">${sc.risk}<span style="font-size:20px">/100</span></div>
+    </div>
+    <div class="risk-badge">${sc.riskLvl}</div>
+  </div>
+
+  <!-- AI REPORT -->
+  <div class="section-title">AI Clinical Assessment</div>
+  <div class="report-body">${reportText}</div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated by SpineIQ — Spine Health Intelligence Platform &nbsp;|&nbsp; ${new Date().toLocaleString('en-GB')}<br>
+    ★ This report is for clinical decision support only. Not a substitute for clinical judgment. v1.0
+  </div>
+
 </div>
+<script>window.onload = function() { window.print(); }</script>
 </body>
 </html>`;
 
-  const blob = new Blob([html], { type: 'text/html' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `SpineIQ_Report_${(D.p.name||'Patient').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
 }
 
 render(); }
@@ -111,9 +176,16 @@ function resetAll() {
   if (confirm('Start a new patient assessment? Current data will be cleared.')) {
     resetData(); currentStep = 0; function downloadReport() {
   const reportText = document.getElementById('rout')?.innerText || '';
-  const sc = score();
+  const sc  = score();
   const sss = calcSSS();
-  if (!reportText) return;
+  if (!reportText) { alert('Please generate the AI report first before downloading.'); return; }
+
+  const sssBg  = sss.total <= 3 ? '#e8f5ee' : sss.total <= 6 ? '#fdf3e3' : sss.total <= 9 ? '#2d1a00' : '#fceef0';
+  const sssCol = sss.total <= 3 ? '#2D6A4F' : sss.total <= 6 ? '#92520A' : sss.total <= 9 ? '#C2541A' : '#8B2635';
+  const bmiBackground = !D.p.bmi ? '#f5f5f5' : parseFloat(D.p.bmi) < 25 ? '#e8f5ee' : parseFloat(D.p.bmi) < 30 ? '#fdf3e3' : '#fceef0';
+  const bmiTextCol    = !D.p.bmi ? '#666'    : parseFloat(D.p.bmi) < 25 ? '#2D6A4F' : parseFloat(D.p.bmi) < 30 ? '#92520A' : '#8B2635';
+  const riskBg  = sc.risk < 35 ? '#e8f5ee' : sc.risk < 65 ? '#fdf3e3' : '#fceef0';
+  const riskCol = sc.risk < 35 ? '#2D6A4F' : sc.risk < 65 ? '#92520A' : '#8B2635';
 
   const html = `<!DOCTYPE html>
 <html>
@@ -121,73 +193,131 @@ function resetAll() {
 <meta charset="UTF-8">
 <title>SpineIQ Clinical Report — ${D.p.name || 'Patient'}</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
-  h1 { color: #4A3F8F; font-size: 22px; border-bottom: 2px solid #4A3F8F; padding-bottom: 8px; }
-  h2 { color: #4A3F8F; font-size: 16px; margin-top: 24px; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-  .brand { font-size: 24px; font-weight: bold; color: #4A3F8F; }
-  .meta { font-size: 13px; color: #666; text-align: right; }
-  .scores { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin: 20px 0; }
-  .score-box { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 8px; padding: 10px; text-align: center; }
-  .score-val { font-size: 22px; font-weight: bold; color: #4A3F8F; }
-  .score-lbl { font-size: 11px; color: #666; margin-top: 2px; }
-  .sss-box { background: ${sss.bg.replace('var(--green-dim)','#e8f5ee').replace('var(--amber-dim)','#fdf3e3').replace('var(--red-dim)','#fceef0')}; border-radius: 10px; padding: 16px 20px; margin: 16px 0; display: flex; justify-content: space-between; align-items: center; }
-  .sss-score { font-size: 40px; font-weight: bold; }
-  .sss-level { font-size: 16px; font-weight: bold; padding: 8px 20px; border-radius: 20px; background: #4A3F8F; color: #fff; }
-  .report-body { white-space: pre-wrap; line-height: 1.8; font-size: 14px; margin-top: 20px; }
-  .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Arial', sans-serif; background: #fff; color: #1a1a1a; }
+  .page { max-width: 780px; margin: 0 auto; padding: 32px 36px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #4A3F8F; }
+  .brand-name { font-size: 26px; font-weight: 800; color: #4A3F8F; letter-spacing: -0.5px; }
+  .brand-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+  .meta table { font-size: 13px; color: #444; border-collapse: collapse; }
+  .meta td { padding: 2px 6px; }
+  .meta td:first-child { color: #888; font-weight: normal; text-align: right; }
+  .meta td:last-child  { font-weight: 600; color: #1a1a1a; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #888; margin: 24px 0 10px; }
+  .scores-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 16px; }
+  .score-box   { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .score-val   { font-size: 24px; font-weight: 800; color: #4A3F8F; line-height: 1; }
+  .score-lbl   { font-size: 11px; color: #888; margin-top: 4px; }
+  .sss-box { border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; background: ${sssBg}; border: 1px solid ${sssCol}44; }
+  .sss-num  { font-size: 46px; font-weight: 800; color: ${sssCol}; line-height: 1; }
+  .sss-sub  { font-size: 11px; color: ${sssCol}; opacity: .7; margin-top: 2px; }
+  .sss-badge { background: ${sssCol}; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 14px; margin-bottom: 6px; display: inline-block; }
+  .sss-mgmt  { font-size: 12px; color: ${sssCol}; text-align: right; }
+  .risk-box { border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: ${riskBg}; border: 1px solid ${riskCol}44; }
+  .risk-num  { font-size: 36px; font-weight: 800; color: ${riskCol}; }
+  .risk-badge { background: ${riskCol}; color: #fff; padding: 6px 16px; border-radius: 16px; font-weight: 700; font-size: 13px; }
+  .sss-breakdown { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 16px; }
+  .sss-item { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 8px; text-align: center; }
+  .sss-item-val { font-size: 18px; font-weight: 700; color: #4A3F8F; }
+  .sss-item-lbl { font-size: 10px; color: #888; margin-top: 2px; }
+  .patient-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+  .patient-cell { background: #f8f8f8; border-radius: 8px; padding: 10px 12px; }
+  .patient-cell .lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .patient-cell .val { font-size: 14px; font-weight: 600; }
+  .report-body { font-size: 13.5px; line-height: 1.9; color: #2a2a2a; white-space: pre-wrap; margin-top: 8px; }
+  .footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #eee; font-size: 11px; color: #aaa; text-align: center; line-height: 1.6; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 20px; }
+  }
 </style>
 </head>
 <body>
-<div class="header">
-  <div>
-    <div class="brand">SpineIQ</div>
-    <div style="font-size:12px;color:#666">Spine Health Intelligence Platform</div>
-  </div>
-  <div class="meta">
-    <div><strong>Patient:</strong> ${D.p.name || '—'}</div>
-    <div><strong>Age:</strong> ${D.p.age || '—'} | <strong>BMI:</strong> ${D.p.bmi || '—'}</div>
-    <div><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</div>
-  </div>
-</div>
+<div class="page">
 
-<h2>Dimension Scores</h2>
-<div class="scores">
-  <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
-  <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
-  <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
-  <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
-  <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
-</div>
-
-<div class="sss-box">
-  <div>
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px">SSS Score</div>
-    <div class="sss-score">${sss.total}<span style="font-size:18px">/11</span></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-name">SpineIQ</div>
+      <div class="brand-sub">Spine Health Intelligence Platform — Clinical Assessment Report</div>
+    </div>
+    <div class="meta">
+      <table>
+        <tr><td>Patient</td><td>${D.p.name || '—'}</td></tr>
+        <tr><td>Age / Sex</td><td>${D.p.age || '—'} yrs / ${D.p.gender || '—'}</td></tr>
+        <tr><td>Date</td><td>${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</td></tr>
+        <tr><td>Occupation</td><td style="text-transform:capitalize">${D.oc.type || '—'}</td></tr>
+      </table>
+    </div>
   </div>
-  <div>
-    <div class="sss-level">${sss.level}</div>
-    <div style="font-size:12px;color:#666;margin-top:6px;text-align:right">${sss.mgmt}</div>
+
+  <!-- PATIENT SUMMARY -->
+  <div class="section-title">Patient Summary</div>
+  <div class="patient-grid">
+    <div class="patient-cell"><div class="lbl">Height</div><div class="val">${D.p.height || '—'} cm</div></div>
+    <div class="patient-cell"><div class="lbl">Weight</div><div class="val">${D.p.weight || '—'} kg</div></div>
+    <div class="patient-cell"><div class="lbl">BMI</div><div class="val" style="color:${bmiTextCol}">${D.p.bmi || '—'}</div></div>
+    <div class="patient-cell"><div class="lbl">Classification</div><div class="val" style="color:${bmiTextCol};font-size:12px">${bmiLbl(D.p.bmi) || '—'}</div></div>
   </div>
-</div>
 
-<h2>Clinical Report</h2>
-<div class="report-body">${reportText}</div>
+  <!-- SSS SCORE -->
+  <div class="section-title">Spine Severity Score (SSS)</div>
+  <div class="sss-breakdown">
+    <div class="sss-item"><div class="sss-item-val">${sss.vas}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">VAS Pain</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.radiculopathy}<span style="font-size:12px">/3</span></div><div class="sss-item-lbl">Radiculopathy</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.odi}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">ODI Disability</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.bmiScore}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">BMI Load</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.chronicity}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">Chronicity</div></div>
+  </div>
+  <div class="sss-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${sssCol};margin-bottom:4px;opacity:.8">Total SSS Score</div>
+      <div class="sss-num">${sss.total}<span style="font-size:20px">/11</span></div>
+      <div class="sss-sub">Clinical severity classification</div>
+    </div>
+    <div style="text-align:right">
+      <div class="sss-badge">${sss.level}</div>
+      <div class="sss-mgmt">${sss.mgmt}</div>
+    </div>
+  </div>
 
-<div class="footer">
-  Generated by SpineIQ — Spine Health Intelligence Platform | ${new Date().toLocaleString()}<br>
-  This report is for clinical decision support only. Not a substitute for clinical judgment.
+  <!-- DIMENSION SCORES -->
+  <div class="section-title">Lifestyle Dimension Scores (0–100)</div>
+  <div class="scores-grid">
+    <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
+    <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
+    <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
+    <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
+    <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
+  </div>
+
+  <!-- RISK SCORE -->
+  <div class="risk-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${riskCol};margin-bottom:4px;opacity:.8">Back Pain Risk Score</div>
+      <div class="risk-num">${sc.risk}<span style="font-size:20px">/100</span></div>
+    </div>
+    <div class="risk-badge">${sc.riskLvl}</div>
+  </div>
+
+  <!-- AI REPORT -->
+  <div class="section-title">AI Clinical Assessment</div>
+  <div class="report-body">${reportText}</div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated by SpineIQ — Spine Health Intelligence Platform &nbsp;|&nbsp; ${new Date().toLocaleString('en-GB')}<br>
+    ★ This report is for clinical decision support only. Not a substitute for clinical judgment. v1.0
+  </div>
+
 </div>
+<script>window.onload = function() { window.print(); }</script>
 </body>
 </html>`;
 
-  const blob = new Blob([html], { type: 'text/html' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `SpineIQ_Report_${(D.p.name||'Patient').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
 }
 
 render();
@@ -269,9 +399,16 @@ async function genReport() {
 
 function downloadReport() {
   const reportText = document.getElementById('rout')?.innerText || '';
-  const sc = score();
+  const sc  = score();
   const sss = calcSSS();
-  if (!reportText) return;
+  if (!reportText) { alert('Please generate the AI report first before downloading.'); return; }
+
+  const sssBg  = sss.total <= 3 ? '#e8f5ee' : sss.total <= 6 ? '#fdf3e3' : sss.total <= 9 ? '#2d1a00' : '#fceef0';
+  const sssCol = sss.total <= 3 ? '#2D6A4F' : sss.total <= 6 ? '#92520A' : sss.total <= 9 ? '#C2541A' : '#8B2635';
+  const bmiBackground = !D.p.bmi ? '#f5f5f5' : parseFloat(D.p.bmi) < 25 ? '#e8f5ee' : parseFloat(D.p.bmi) < 30 ? '#fdf3e3' : '#fceef0';
+  const bmiTextCol    = !D.p.bmi ? '#666'    : parseFloat(D.p.bmi) < 25 ? '#2D6A4F' : parseFloat(D.p.bmi) < 30 ? '#92520A' : '#8B2635';
+  const riskBg  = sc.risk < 35 ? '#e8f5ee' : sc.risk < 65 ? '#fdf3e3' : '#fceef0';
+  const riskCol = sc.risk < 35 ? '#2D6A4F' : sc.risk < 65 ? '#92520A' : '#8B2635';
 
   const html = `<!DOCTYPE html>
 <html>
@@ -279,73 +416,131 @@ function downloadReport() {
 <meta charset="UTF-8">
 <title>SpineIQ Clinical Report — ${D.p.name || 'Patient'}</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
-  h1 { color: #4A3F8F; font-size: 22px; border-bottom: 2px solid #4A3F8F; padding-bottom: 8px; }
-  h2 { color: #4A3F8F; font-size: 16px; margin-top: 24px; }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-  .brand { font-size: 24px; font-weight: bold; color: #4A3F8F; }
-  .meta { font-size: 13px; color: #666; text-align: right; }
-  .scores { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin: 20px 0; }
-  .score-box { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 8px; padding: 10px; text-align: center; }
-  .score-val { font-size: 22px; font-weight: bold; color: #4A3F8F; }
-  .score-lbl { font-size: 11px; color: #666; margin-top: 2px; }
-  .sss-box { background: ${sss.bg.replace('var(--green-dim)','#e8f5ee').replace('var(--amber-dim)','#fdf3e3').replace('var(--red-dim)','#fceef0')}; border-radius: 10px; padding: 16px 20px; margin: 16px 0; display: flex; justify-content: space-between; align-items: center; }
-  .sss-score { font-size: 40px; font-weight: bold; }
-  .sss-level { font-size: 16px; font-weight: bold; padding: 8px 20px; border-radius: 20px; background: #4A3F8F; color: #fff; }
-  .report-body { white-space: pre-wrap; line-height: 1.8; font-size: 14px; margin-top: 20px; }
-  .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 11px; color: #999; text-align: center; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Arial', sans-serif; background: #fff; color: #1a1a1a; }
+  .page { max-width: 780px; margin: 0 auto; padding: 32px 36px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #4A3F8F; }
+  .brand-name { font-size: 26px; font-weight: 800; color: #4A3F8F; letter-spacing: -0.5px; }
+  .brand-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+  .meta table { font-size: 13px; color: #444; border-collapse: collapse; }
+  .meta td { padding: 2px 6px; }
+  .meta td:first-child { color: #888; font-weight: normal; text-align: right; }
+  .meta td:last-child  { font-weight: 600; color: #1a1a1a; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #888; margin: 24px 0 10px; }
+  .scores-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 16px; }
+  .score-box   { background: #f5f3ff; border: 1px solid #c5bce8; border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .score-val   { font-size: 24px; font-weight: 800; color: #4A3F8F; line-height: 1; }
+  .score-lbl   { font-size: 11px; color: #888; margin-top: 4px; }
+  .sss-box { border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; background: ${sssBg}; border: 1px solid ${sssCol}44; }
+  .sss-num  { font-size: 46px; font-weight: 800; color: ${sssCol}; line-height: 1; }
+  .sss-sub  { font-size: 11px; color: ${sssCol}; opacity: .7; margin-top: 2px; }
+  .sss-badge { background: ${sssCol}; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 14px; margin-bottom: 6px; display: inline-block; }
+  .sss-mgmt  { font-size: 12px; color: ${sssCol}; text-align: right; }
+  .risk-box { border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; background: ${riskBg}; border: 1px solid ${riskCol}44; }
+  .risk-num  { font-size: 36px; font-weight: 800; color: ${riskCol}; }
+  .risk-badge { background: ${riskCol}; color: #fff; padding: 6px 16px; border-radius: 16px; font-weight: 700; font-size: 13px; }
+  .sss-breakdown { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 16px; }
+  .sss-item { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 8px; text-align: center; }
+  .sss-item-val { font-size: 18px; font-weight: 700; color: #4A3F8F; }
+  .sss-item-lbl { font-size: 10px; color: #888; margin-top: 2px; }
+  .patient-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+  .patient-cell { background: #f8f8f8; border-radius: 8px; padding: 10px 12px; }
+  .patient-cell .lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .patient-cell .val { font-size: 14px; font-weight: 600; }
+  .report-body { font-size: 13.5px; line-height: 1.9; color: #2a2a2a; white-space: pre-wrap; margin-top: 8px; }
+  .footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #eee; font-size: 11px; color: #aaa; text-align: center; line-height: 1.6; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 20px; }
+  }
 </style>
 </head>
 <body>
-<div class="header">
-  <div>
-    <div class="brand">SpineIQ</div>
-    <div style="font-size:12px;color:#666">Spine Health Intelligence Platform</div>
-  </div>
-  <div class="meta">
-    <div><strong>Patient:</strong> ${D.p.name || '—'}</div>
-    <div><strong>Age:</strong> ${D.p.age || '—'} | <strong>BMI:</strong> ${D.p.bmi || '—'}</div>
-    <div><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</div>
-  </div>
-</div>
+<div class="page">
 
-<h2>Dimension Scores</h2>
-<div class="scores">
-  <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
-  <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
-  <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
-  <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
-  <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
-</div>
-
-<div class="sss-box">
-  <div>
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px">SSS Score</div>
-    <div class="sss-score">${sss.total}<span style="font-size:18px">/11</span></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-name">SpineIQ</div>
+      <div class="brand-sub">Spine Health Intelligence Platform — Clinical Assessment Report</div>
+    </div>
+    <div class="meta">
+      <table>
+        <tr><td>Patient</td><td>${D.p.name || '—'}</td></tr>
+        <tr><td>Age / Sex</td><td>${D.p.age || '—'} yrs / ${D.p.gender || '—'}</td></tr>
+        <tr><td>Date</td><td>${new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}</td></tr>
+        <tr><td>Occupation</td><td style="text-transform:capitalize">${D.oc.type || '—'}</td></tr>
+      </table>
+    </div>
   </div>
-  <div>
-    <div class="sss-level">${sss.level}</div>
-    <div style="font-size:12px;color:#666;margin-top:6px;text-align:right">${sss.mgmt}</div>
+
+  <!-- PATIENT SUMMARY -->
+  <div class="section-title">Patient Summary</div>
+  <div class="patient-grid">
+    <div class="patient-cell"><div class="lbl">Height</div><div class="val">${D.p.height || '—'} cm</div></div>
+    <div class="patient-cell"><div class="lbl">Weight</div><div class="val">${D.p.weight || '—'} kg</div></div>
+    <div class="patient-cell"><div class="lbl">BMI</div><div class="val" style="color:${bmiTextCol}">${D.p.bmi || '—'}</div></div>
+    <div class="patient-cell"><div class="lbl">Classification</div><div class="val" style="color:${bmiTextCol};font-size:12px">${bmiLbl(D.p.bmi) || '—'}</div></div>
   </div>
-</div>
 
-<h2>Clinical Report</h2>
-<div class="report-body">${reportText}</div>
+  <!-- SSS SCORE -->
+  <div class="section-title">Spine Severity Score (SSS)</div>
+  <div class="sss-breakdown">
+    <div class="sss-item"><div class="sss-item-val">${sss.vas}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">VAS Pain</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.radiculopathy}<span style="font-size:12px">/3</span></div><div class="sss-item-lbl">Radiculopathy</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.odi}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">ODI Disability</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.bmiScore}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">BMI Load</div></div>
+    <div class="sss-item"><div class="sss-item-val">${sss.chronicity}<span style="font-size:12px">/2</span></div><div class="sss-item-lbl">Chronicity</div></div>
+  </div>
+  <div class="sss-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${sssCol};margin-bottom:4px;opacity:.8">Total SSS Score</div>
+      <div class="sss-num">${sss.total}<span style="font-size:20px">/11</span></div>
+      <div class="sss-sub">Clinical severity classification</div>
+    </div>
+    <div style="text-align:right">
+      <div class="sss-badge">${sss.level}</div>
+      <div class="sss-mgmt">${sss.mgmt}</div>
+    </div>
+  </div>
 
-<div class="footer">
-  Generated by SpineIQ — Spine Health Intelligence Platform | ${new Date().toLocaleString()}<br>
-  This report is for clinical decision support only. Not a substitute for clinical judgment.
+  <!-- DIMENSION SCORES -->
+  <div class="section-title">Lifestyle Dimension Scores (0–100)</div>
+  <div class="scores-grid">
+    <div class="score-box"><div class="score-val">${sc.lifestyle}</div><div class="score-lbl">Lifestyle</div></div>
+    <div class="score-box"><div class="score-val">${sc.activity}</div><div class="score-lbl">Activity</div></div>
+    <div class="score-box"><div class="score-val">${sc.sleep}</div><div class="score-lbl">Sleep</div></div>
+    <div class="score-box"><div class="score-val">${sc.mobility}</div><div class="score-lbl">Mobility</div></div>
+    <div class="score-box"><div class="score-val">${sc.obesity}</div><div class="score-lbl">Weight</div></div>
+  </div>
+
+  <!-- RISK SCORE -->
+  <div class="risk-box">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${riskCol};margin-bottom:4px;opacity:.8">Back Pain Risk Score</div>
+      <div class="risk-num">${sc.risk}<span style="font-size:20px">/100</span></div>
+    </div>
+    <div class="risk-badge">${sc.riskLvl}</div>
+  </div>
+
+  <!-- AI REPORT -->
+  <div class="section-title">AI Clinical Assessment</div>
+  <div class="report-body">${reportText}</div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated by SpineIQ — Spine Health Intelligence Platform &nbsp;|&nbsp; ${new Date().toLocaleString('en-GB')}<br>
+    ★ This report is for clinical decision support only. Not a substitute for clinical judgment. v1.0
+  </div>
+
 </div>
+<script>window.onload = function() { window.print(); }</script>
 </body>
 </html>`;
 
-  const blob = new Blob([html], { type: 'text/html' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `SpineIQ_Report_${(D.p.name||'Patient').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
 }
 
 render();
