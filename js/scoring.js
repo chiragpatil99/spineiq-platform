@@ -88,9 +88,9 @@ function calcSSS() {
   sss.radiculopathy = parseInt(D.cl.radiculopathy) || 0;
 
   // 3. ODI Disability Score (0–2) — from 5 ODI fields, each 0–2
-  const odiMap = { normal: 0, mild: 1, severe: 2 };
+  const odiMap = { normal: 0, mild: 1, severe: 2, severe3: 3 };
   const odiTotal = ['walking','sitting','standing','sleep','daily'].reduce((a,f) => a + (odiMap[D.od[f]] || 0), 0);
-  sss.odi = odiTotal <= 2 ? 0 : odiTotal <= 5 ? 1 : 2;
+  sss.odi = odiTotal <= 3 ? 0 : odiTotal <= 8 ? 1 : 2;
   sss.odiTotal = odiTotal;
 
   // 4. BMI Mechanical Load (0–2)
