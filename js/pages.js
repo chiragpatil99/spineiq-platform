@@ -9,9 +9,10 @@ function markWatched(id) {
   const form = document.getElementById('video-form-' + id);
   const btn  = document.getElementById('video-watched-btn-' + id);
   if (gate) gate.style.opacity = '1';
-  if (btn)  btn.innerHTML = '✅ Video watched — form unlocked';
-  if (btn)  btn.style.background = 'var(--green)';
+  if (btn)  { btn.innerHTML = '&#x2705; Video watched — form unlocked'; btn.style.background = 'var(--green)'; }
   if (form) { form.style.pointerEvents = 'auto'; form.style.opacity = '1'; }
+  // Refresh the Continue button so it unlocks
+  if (typeof updateActions === 'function') updateActions();
 }
 
 function videoGate(id, title, duration, desc) {
