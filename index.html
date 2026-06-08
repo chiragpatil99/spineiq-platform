@@ -2,63 +2,122 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpineIQ — Spine Health Intelligence Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#4A3F8F" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A0E1A" media="(prefers-color-scheme: dark)">
+<title>SpineIQ</title>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<nav class="topnav">
-  <div class="brand">
-    <div class="brand-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.5-5 5.5 0 2 1 3.5 2 5L12 22l3-8.5c1-1.5 2-3 2-5C17 5.5 15 3 12 3z"/><circle cx="12" cy="8.5" r="1.5" fill="#fff" stroke="none"/></svg>
-    </div>
-    <div>
-      <div class="brand-name">SpineIQ</div>
-      <div class="brand-sub">Spine Health Intelligence Platform</div>
-    </div>
-  </div>
-  <div class="nav-pills">
-    <button class="nav-pill active">Assessment</button>
-    <button class="nav-pill" onclick="showComingSoon('Reports')">Reports</button>
-    <button class="nav-pill" onclick="showComingSoon('Analytics')">Analytics</button>
-    <button class="nav-pill" onclick="showComingSoon('Settings')">Settings</button>
-  </div>
-  <div class="nav-right">
-    <div class="badge-phase">PHASE 1</div>
-    <button class="btn-new" onclick="resetAll()">+ New Patient</button>
-  </div>
-</nav>
+<div id="toast"></div>
 
-<!-- Coming Soon Toast -->
-<div id="toast" style="display:none;position:fixed;top:80px;right:24px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:12px 20px;border-radius:var(--r);font-size:14px;z-index:999;box-shadow:0 8px 24px #0006"></div>
+<div class="app-shell">
 
-<div class="layout">
-  <nav class="sidebar">
-    <div class="sidebar-section-label">Assessment Flow</div>
-    <button class="sitem active" data-s="0" onclick="goStep(0)"><span class="step-num">1</span>Patient Information</button>
-    <button class="sitem" data-s="1" onclick="goStep(1)"><span class="step-num">2</span>Occupation</button>
-    <button class="sitem" data-s="2" onclick="goStep(2)"><span class="step-num">3</span>Work Patterns</button>
-    <button class="sitem" data-s="3" onclick="goStep(3)"><span class="step-num">4</span>Lifestyle</button>
-    <button class="sitem" data-s="4" onclick="goStep(4)"><span class="step-num">5</span>Health Data</button>
-    <button class="sitem" data-s="5" onclick="goStep(5)"><span class="step-num">6</span>Pain Assessment</button>
-    <button class="sitem" data-s="6" onclick="goStep(6)"><span class="step-num">7</span>Radiculopathy & ODI</button>
-    <button class="sitem" data-s="7" onclick="goStep(7)"><span class="step-num">8</span>Red Flag Screening</button>
-    <button class="sitem" data-s="8" onclick="goStep(8)"><span class="step-num">9</span>Functional Status</button>
-    <button class="sitem" data-s="9" onclick="goStep(9)"><span class="step-num">10</span>Risk Report</button>
-    <div class="sidebar-section-label">System</div>
-    <button class="sitem" onclick="showComingSoon('Patient Records')"><span class="step-num si-icon">◈</span>Patient Records</button>
-    <button class="sitem" onclick="showComingSoon('Analytics')"><span class="step-num si-icon">◈</span>Analytics</button>
-    <div class="sidebar-progress">
-      <div class="sp-head">
-        <span class="sp-label">Assessment progress</span>
-        <span class="sp-pct" id="sp-pct">10%</span>
+  <!-- ── HEADER ── -->
+  <header class="app-header">
+    <div class="app-header-brand">
+      <div class="app-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3c-3 0-5 2.5-5 5.5 0 2 1 3.5 2 5L12 22l3-8.5c1-1.5 2-3 2-5C17 5.5 15 3 12 3z"/><circle cx="12" cy="8.5" r="1.5" fill="#fff" stroke="none"/></svg>
       </div>
-      <div class="sp-track"><div class="sp-fill" id="sp-fill" style="width:10%"></div></div>
+      <div>
+        <div class="app-header-title">SpineIQ</div>
+      </div>
     </div>
+    <div class="app-header-badge">PHASE 1</div>
+  </header>
+
+  <!-- ── CONTENT AREA ── -->
+  <div class="app-content" id="app-content">
+
+    <!-- ASSESSMENT TAB -->
+    <div id="screen-assess" class="assessment-screen active">
+      <div class="step-progress" id="step-progress">
+        <div class="step-progress-top">
+          <div class="step-progress-title" id="step-title-label">Patient Information</div>
+          <div class="step-progress-count" id="step-count-label">Step 1 of 10</div>
+        </div>
+        <div class="step-progress-bar">
+          <div class="step-progress-fill" id="progress-fill" style="width:10%"></div>
+        </div>
+        <div class="step-dots" id="step-dots"></div>
+      </div>
+      <div class="step-content" id="main"></div>
+      <div class="step-actions" id="step-actions"></div>
+    </div>
+
+    <!-- REPORT TAB -->
+    <div id="screen-report" class="report-screen"></div>
+
+    <!-- SETTINGS TAB -->
+    <div id="screen-settings" class="settings-screen">
+      <div class="step-hdr" style="padding:0;margin-bottom:20px">
+        <div class="step-title">Settings</div>
+        <div class="step-desc">Platform preferences and information</div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Assessment</div></div>
+        <div class="settings-item" onclick="resetAll()" style="cursor:pointer">
+          <div><div class="settings-label">New patient</div><div class="settings-sub">Clear all data and start fresh</div></div>
+          <span style="color:var(--text3);font-size:18px">→</span>
+        </div>
+        <div class="settings-item" onclick="goToStep(0)" style="cursor:pointer;margin-top:8px">
+          <div><div class="settings-label">Restart assessment</div><div class="settings-sub">Go back to step 1</div></div>
+          <span style="color:var(--text3);font-size:18px">→</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Platform</div></div>
+        <div class="settings-item">
+          <div><div class="settings-label">Version</div></div>
+          <span class="settings-badge">Phase 1 v2.0</span>
+        </div>
+        <div class="settings-item" style="margin-top:8px">
+          <div><div class="settings-label">Theme</div></div>
+          <span class="settings-badge">Auto (system)</span>
+        </div>
+        <div class="settings-item" style="margin-top:8px">
+          <div><div class="settings-label">Backend</div><div class="settings-sub">spineiq-backend.onrender.com</div></div>
+          <span style="color:var(--green);font-size:12px;font-weight:600">● Live</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot" style="background:var(--amber)"></div><div class="card-label">Coming in Phase 2</div></div>
+        <div class="settings-item"><div><div class="settings-label">Patient records</div><div class="settings-sub">Save and review past assessments</div></div></div>
+        <div class="settings-item" style="margin-top:8px"><div><div class="settings-label">Analytics dashboard</div><div class="settings-sub">Population-level risk insights</div></div></div>
+        <div class="settings-item" style="margin-top:8px"><div><div class="settings-label">Fitbit integration</div><div class="settings-sub">OAuth sync from Fitbit devices</div></div></div>
+        <div class="settings-item" style="margin-top:8px"><div><div class="settings-label">Clinician login</div><div class="settings-sub">Role-based access and records</div></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── BOTTOM TAB BAR ── -->
+  <nav class="tab-bar">
+    <button class="tab-item active" id="tab-assess" onclick="switchTab('assess')">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+        <div class="tab-dot" id="tab-assess-dot"></div>
+      </div>
+      <span class="tab-label">Assess</span>
+    </button>
+    <button class="tab-item" id="tab-report" onclick="switchTab('report')">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <div class="tab-dot" id="tab-report-dot"></div>
+      </div>
+      <span class="tab-label">Report</span>
+    </button>
+    <button class="tab-item" id="tab-settings" onclick="switchTab('settings')">
+      <div class="tab-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </div>
+      <span class="tab-label">Settings</span>
+    </button>
   </nav>
-  <main class="main" id="main"></main>
+
 </div>
 
 <script src="js/data.js"></script>
@@ -67,16 +126,10 @@
 <script src="js/pages.js"></script>
 <script src="js/app.js"></script>
 <script>
-function showComingSoon(name) {
-  const toast = document.getElementById('toast');
-  toast.textContent = `${name} — Coming in Phase 2 🚀`;
-  toast.style.display = 'block';
-  setTimeout(() => toast.style.display = 'none', 2500);
-}
 // Handle Google Fit OAuth redirect callback
 if (window.location.hash.includes('access_token')) {
   const connected = handleGoogleFitCallback();
-  if (connected) { setTimeout(() => { goStep(4); }, 100); }
+  if (connected) { setTimeout(() => { switchTab('assess'); goToStep(4); }, 100); }
 }
 </script>
 </body>
