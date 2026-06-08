@@ -273,7 +273,7 @@ const PAGES = [
 
   // ── STEP 6: Radiculopathy + ODI ───────────────────────────────
   () => {
-    const odiOpts = [['normal','Normal (0)'],['mild','Mild difficulty (1)'],['severe','Severe difficulty (2)']];
+    const odiOpts = [['normal','Normal (0)'],['mild','Mild difficulty (1)'],['severe','Severe difficulty (2)'],['severe3','Severe difficulty (3)']];
     const odiFields = [['walking','Walking'],['sitting','Sitting'],['standing','Standing'],['sleep','Sleep'],['daily','Daily Activities']];
     return `
     <div class="step-hdr"><div class="step-title">Radiculopathy & Disability</div>
@@ -299,13 +299,13 @@ const PAGES = [
         <label>${l}</label>
         <div class="tgroup">
           ${odiOpts.map(([v,lbl])=>`
-          <button class="tbtn ${D.od[k]===v?(v==='normal'?'sel-normal':v==='mild'?'sel-mild':'sel-severe'):''}"
+          <button class="tbtn ${D.od[k]===v?(v==='normal'?'sel-normal':v==='mild'?'sel-mild':v==='severe'?'sel-mod':'sel-severe'):''}"
             onclick="D.od['${k}']='${v}';render()">${lbl}</button>`).join('')}
         </div>
       </div>`).join('')}
       <div style="margin-top:12px;padding:12px;background:var(--bg3);border-radius:var(--r);font-size:13px">
-        ODI Total: <strong style="color:var(--purple2)">${['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2}[D.od[f]]||0),0)}/10</strong>
-        — Points: <strong style="color:var(--purple2)">${['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2}[D.od[f]]||0),0)<=2?'0':['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2}[D.od[f]]||0),0)<=5?'1':'2'}/2</strong>
+        ODI Total: <strong style="color:var(--purple2)">${['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2,'severe3':3}[D.od[f]]||0),0)}/15</strong>
+        — Points: <strong style="color:var(--purple2)">${['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2,'severe3':3}[D.od[f]]||0),0)<=2?'0':['walking','sitting','standing','sleep','daily'].reduce((a,f)=>a+({'normal':0,'mild':1,'severe':2,'severe3':3}[D.od[f]]||0),0)<=5?'1':'2'}/2</strong>
       </div>
     </div>`;
   },
@@ -453,6 +453,7 @@ const PAGES = [
     </div>
 
     <button class="gen-btn" id="gbtn" onclick="genReport()">✦ Generate AI Clinical Report</button>
-    <div id="rout"></div>`;
+    <div id="rout"></div>
+    <div id="download-wrap"></div>`;
   }
 ];
