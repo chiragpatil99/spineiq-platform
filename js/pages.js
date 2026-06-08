@@ -258,7 +258,11 @@ const PAGES = [
   },
 
   // ── STEP 5: Pain Assessment ────────────────────────────────────
-  () => `
+  () => videoGate('pain',
+    'Understanding Back Pain & the VAS Scale',
+    '2:30',
+    'Learn how to accurately rate your pain intensity, identify pain location, and describe your pain pattern before completing this section.'
+  ) + `
   <div class="step-hdr"><div class="step-title">Pain Assessment — VAS</div>
   <div class="step-desc">Location, intensity, character, duration, and functional impact of pain</div></div>
   <div class="card">
@@ -330,11 +334,11 @@ const PAGES = [
     return `
     <div class="step-hdr"><div class="step-title">Radiculopathy & Disability</div>
     <div class="step-desc">Leg symptom severity (SSS Section 2) and Modified ODI disability scoring (SSS Section 3)</div></div>
-    ${videoGate('odi',
+` + videoGate('odi',
       'Understanding Nerve Pain & Daily Disability',
       '2:45',
       'Learn the difference between nerve pain and muscle pain, what radiculopathy means, and how to honestly rate your ability to perform daily activities.'
-    )}
+    ) + `
     <div class="card">
       <div class="card-hdr"><div class="card-dot" style="background:var(--red)"></div><div class="card-label">Leg radiculopathy / sciatica severity (0–3)</div></div>
       <div class="field"><label>Select severity grade</label>
@@ -383,11 +387,11 @@ const PAGES = [
     return `
     <div class="step-hdr"><div class="step-title">Red Flag Screening</div>
     <div class="step-desc">SSS Section 6 — Tick if present. Any red flag automatically sets SSS score to 11 (urgent).</div></div>
-    ${videoGate('redflag',
+` + videoGate('redflag',
       'Understanding Red Flags in Back Pain',
       '3:00',
       'Some back pain symptoms require urgent medical attention. This video explains each red flag warning sign in plain language so you can answer accurately and safely.'
-    )}
+    ) + `
     <div class="card">
       <div class="card-hdr"><div class="card-dot" style="background:var(--red)"></div><div class="card-label">Red flag indicators</div></div>
       <div style="display:flex;flex-direction:column;gap:12px">
