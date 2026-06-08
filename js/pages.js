@@ -16,38 +16,49 @@ function markWatched(id) {
 
 function videoGate(id, title, duration, desc) {
   var w = watchedVideos[id];
-  var borderCol  = w ? 'var(--green)' : 'var(--purple2)';
-  var bgCol      = w ? 'var(--green-dim)' : 'var(--purple-dim)';
-  var labelText  = w ? '&#x2705; Video watched' : '&#x1F4F9; Watch before continuing';
-  var btnBg      = w ? 'var(--green)' : 'var(--purple2)';
-  var btnText    = w ? '&#x2705; Video watched &mdash; form unlocked' : '&#x25B6; Mark as watched to unlock form';
-  var formStyle  = w ? 'pointer-events:auto;opacity:1' : 'pointer-events:none;opacity:0.35';
-  var videoOp    = w ? '1' : '0.95';
+  var borderCol = w ? 'var(--green)' : 'var(--purple2)';
+  var bgCol     = w ? 'var(--green-dim)' : 'var(--purple-dim)';
+  var labelText = w ? '&#x2705; Video watched' : '&#x1F4F9; Watch before continuing';
+  var btnBg     = w ? 'var(--green)' : 'var(--purple2)';
+  var btnText   = w ? '&#x2705; Video watched — form unlocked' : '&#x25B6; Mark as watched to unlock form';
+  var formStyle = w ? 'pointer-events:auto;opacity:1' : 'pointer-events:none;opacity:0.35';
+  var videoOp   = w ? '1' : '0.95';
 
-  return '<div class="card" style="margin-bottom:12px;border-color:' + borderCol + '33;background:' + bgCol + '">'
+  var html = '<div class="card" style="margin-bottom:12px;border-color:' + borderCol + '33;background:' + bgCol + '">'
     + '<div class="card-hdr">'
     + '<div class="card-dot" style="background:' + borderCol + '"></div>'
     + '<div class="card-label" style="color:' + borderCol + '">' + labelText + '</div>'
     + '</div>'
     + '<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">' + title + '</div>'
     + '<div style="font-size:12px;color:var(--text2);margin-bottom:12px">' + desc + '</div>'
-    + '<div id="video-gate-' + id + '" style="position:relative;border-radius:var(--r);overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px;opacity:' + videoOp + '">'
+    + '<div id="video-gate-' + id + '" style="position:relative;border-radius:var(--r);overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px;opacity:' + videoOp + ';cursor:pointer" data-vid="' + id + '" class="vid-play-btn">'
     + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#1a1040,#0a1520)">'
-    + '<div style="width:56px;height:56px;background:var(--purple2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="markWatched(\"' + id + '\")">'
+    + '<div style="width:56px;height:56px;background:var(--purple2);border-radius:50%;display:flex;align-items:center;justify-content:center">'
     + '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
     + '</div>'
     + '<div style="color:#fff;font-size:13px;font-weight:500">' + title + '</div>'
-    + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + duration + ' &middot; Tap to play</div>'
+    + '<div style="color:rgba(255,255,255,0.5);font-size:11px">' + duration + ' · Tap to play</div>'
     + '</div>'
     + '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px">' + duration + '</div>'
     + '</div>'
-    + '<button id="video-watched-btn-' + id + '" onclick="markWatched(\"' + id + '\")" '
-    + 'style="width:100%;padding:11px;border-radius:var(--r);border:none;background:' + btnBg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">'
+    + '<button id="video-watched-btn-' + id + '" data-vid="' + id + '" class="vid-watch-btn"'
+    + ' style="width:100%;padding:11px;border-radius:var(--r);border:none;background:' + btnBg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">'
     + btnText
     + '</button>'
     + '</div>'
     + '<div id="video-form-' + id + '" style="' + formStyle + ';transition:all .3s">';
+
+  return html;
 }
+
+// Delegate click handler for video gate buttons (avoids inline onclick issues)
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('.vid-play-btn, .vid-watch-btn');
+  if (el) {
+    var vid = el.getAttribute('data-vid');
+    if (vid) markWatched(vid);
+  }
+});
 
 /**
  * SpineIQ — Page Templates v2.0
