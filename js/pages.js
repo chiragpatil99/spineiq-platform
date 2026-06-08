@@ -33,7 +33,7 @@ function videoGate(id, title, duration, desc) {
     + '<div style="font-size:12px;color:var(--text2);margin-bottom:12px">' + desc + '</div>'
     + '<div id="video-gate-' + id + '" style="position:relative;border-radius:var(--r);overflow:hidden;background:#000;aspect-ratio:16/9;margin-bottom:12px;opacity:' + videoOp + '">'
     + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#1a1040,#0a1520)">'
-    + '<div style="width:56px;height:56px;background:var(--purple2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="markWatched('' + id + '')">'
+    + '<div style="width:56px;height:56px;background:var(--purple2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="markWatched(\"' + id + '\")">'
     + '<svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
     + '</div>'
     + '<div style="color:#fff;font-size:13px;font-weight:500">' + title + '</div>'
@@ -41,7 +41,7 @@ function videoGate(id, title, duration, desc) {
     + '</div>'
     + '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px">' + duration + '</div>'
     + '</div>'
-    + '<button id="video-watched-btn-' + id + '" onclick="markWatched('' + id + '')" '
+    + '<button id="video-watched-btn-' + id + '" onclick="markWatched(\"' + id + '\")" '
     + 'style="width:100%;padding:11px;border-radius:var(--r);border:none;background:' + btnBg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">'
     + btnText
     + '</button>'
