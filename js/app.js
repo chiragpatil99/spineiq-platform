@@ -59,15 +59,23 @@ function updateProgress() {
   }
 }
 
+// Steps that require a video to be watched before continuing
+const VIDEO_GATES = { 5: 'pain', 6: 'odi', 7: 'redflag' };
+
 function updateActions() {
   const actions = document.getElementById('step-actions');
   if (!actions) return;
+  const gateId = VIDEO_GATES[currentStep];
+  const locked = gateId && !watchedVideos[gateId];
   actions.innerHTML = `
     ${currentStep > 0
       ? `<button class="btn-back" onclick="goStep(${currentStep - 1})">← Back</button>`
       : ''}
     ${currentStep < TOTAL_STEPS - 1
-      ? `<button class="btn-next" onclick="goStep(${currentStep + 1})" style="${currentStep === 0 ? 'flex:1' : ''}">Continue →</button>`
+      ? `<button class="btn-next" onclick="${locked ? `showToast('Watch the video above to continue')` : `goStep(${currentStep + 1})`}"
+          style="${currentStep === 0 ? 'flex:1' : ''};${locked ? 'opacity:.4' : ''}">
+          ${locked ? '🔒 Watch video to continue' : 'Continue →'}
+        </button>`
       : `<button class="btn-next" onclick="showReport()" style="${currentStep === 0 ? 'flex:1' : ''}">View Report ✦</button>`}`;
 }
 
