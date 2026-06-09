@@ -103,86 +103,165 @@ function showReport() {
   const bench = habitBenchmark();
   const anyRedFlag = Object.values(D.rf).some(v => v);
 
+  // initials from name
+  const initials = (D.p.name || 'P').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase() || 'PT';
+
+  // contributor impact tag
+  function impactTag(col) {
+    const high = col === 'var(--red)' || col === '#EF4444' || col === 'var(--red)';
+    if (high) return '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:var(--red-dim);color:var(--red);flex-shrink:0">High</span>';
+    return '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:var(--amber-dim);color:var(--amber);flex-shrink:0">Moderate</span>';
+  }
+
+  // bench status tag
+  function benchTag(col) {
+    if (col === 'var(--red)' || col === '#EF4444') return 'var(--red-dim);color:var(--red)';
+    if (col === 'var(--amber)' || col === '#F59E0B') return 'var(--amber-dim);color:var(--amber)';
+    return 'var(--green-dim);color:var(--green)';
+  }
+  function benchLabel(col) {
+    if (col === 'var(--red)' || col === '#EF4444') return 'High risk';
+    if (col === 'var(--amber)' || col === '#F59E0B') return 'Below ideal';
+    return 'Healthy';
+  }
+  function benchIcon(text) {
+    if (text.toLowerCase().includes('sit')) return 'ti-armchair';
+    if (text.toLowerCase().includes('walk')) return 'ti-walk';
+    if (text.toLowerCase().includes('exercise') || text.toLowerCase().includes('activity')) return 'ti-barbell';
+    return 'ti-moon';
+  }
+
+  // score ring inline svg
+  function ring(val, col) {
+    const r = 20, c = 2*Math.PI*r;
+    const dash = (val/100)*c;
+    return `<svg width="56" height="56" viewBox="0 0 56 56">
+      <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--border)" stroke-width="5"/>
+      <circle cx="28" cy="28" r="${r}" fill="none" stroke="${col}" stroke-width="5"
+        stroke-linecap="round" stroke-dasharray="${dash} ${c}" transform="rotate(-90 28 28)"/>
+      <text x="28" y="33" text-anchor="middle" font-size="13" font-weight="500" fill="${col}" font-family="inherit">${val}</text>
+    </svg>`;
+  }
+
   const SCORES = [
-    ['Lifestyle', sc.lifestyle, '#8B7CF6'],
-    ['Activity',  sc.activity,  '#00B4A0'],
-    ['Sleep',     sc.sleep,     '#3B82F6'],
-    ['Mobility',  sc.mobility,  '#F59E0B'],
-    ['Weight',    sc.obesity,   '#22C55E'],
+    ['Lifestyle', sc.lifestyle, 'var(--purple2)'],
+    ['Activity',  sc.activity,  'var(--teal)'],
+    ['Sleep',     sc.sleep,     'var(--blue)'],
+    ['Mobility',  sc.mobility,  'var(--amber)'],
+    ['Weight',    sc.obesity,   'var(--green)'],
   ];
 
   const reportEl = document.getElementById('screen-report');
   reportEl.innerHTML = `
-    <div class="step-hdr" style="padding:16px 16px 0">
-      <div class="step-title">Risk Report</div>
-      <div class="step-desc">SSS clinical score + AI assessment</div>
-    </div>
-    <div style="padding:0 16px 100px">
+    <div style="padding:14px;display:flex;flex-direction:column;gap:12px;padding-bottom:100px">
 
-      ${anyRedFlag ? `<div class="alert alert-danger" style="margin:12px 0">
-        🚨 <strong>RED FLAG — SSS Score = 11. Urgent specialist evaluation required.</strong>
+      ${anyRedFlag ? `<div class="alert alert-danger">
+        🚨 <strong>Red flag present — SSS score = 11. Urgent specialist evaluation required.</strong>
       </div>` : ''}
 
-      <div class="summary-row">
-        <div class="sum-chip"><div class="s-lbl">Patient</div><div class="s-val">${D.p.name||'—'}</div></div>
-        <div class="sum-chip"><div class="s-lbl">Age</div><div class="s-val">${D.p.age?D.p.age+' yrs':'—'}</div></div>
-        <div class="sum-chip"><div class="s-lbl">BMI</div><div class="s-val" style="color:${bmiCol(D.p.bmi)}">${D.p.bmi||'—'}</div></div>
-        <div class="sum-chip"><div class="s-lbl">Class</div><div class="s-val" style="font-size:11px;color:${bmiCol(D.p.bmi)}">${bmiLbl(D.p.bmi)||'—'}</div></div>
-        <div class="sum-chip"><div class="s-lbl">Job</div><div class="s-val" style="font-size:11px;text-transform:capitalize">${D.oc.type||'—'}</div></div>
+      <!-- PATIENT CARD -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)">
+        <div style="width:46px;height:46px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--purple2);flex-shrink:0">${initials}</div>
+        <div style="min-width:0">
+          <div style="font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${D.p.name||'Patient'}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${D.p.age?D.p.age+' yrs':''} ${D.p.gender?'· '+D.p.gender:''} ${D.oc.type?'· '+D.oc.type:''}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:600;background:var(--amber-dim);color:var(--amber);padding:2px 8px;border-radius:10px;border:1px solid var(--amber)22">BMI ${D.p.bmi||'—'} · ${bmiLbl(D.p.bmi)||'—'}</span>
+            ${D.wp.sitting > 7 ? `<span style="font-size:11px;font-weight:600;background:var(--red-dim);color:var(--red);padding:2px 8px;border-radius:10px;border:1px solid var(--red)22">${D.wp.sitting}h sitting/day</span>` : ''}
+          </div>
+        </div>
       </div>
 
-      <div class="sss-score-card">
-        <div class="sss-sub-scores">
-          <div class="sss-sub-item"><div class="sss-sub-val">${sss.vas}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">VAS Pain</div></div>
-          <div class="sss-sub-item"><div class="sss-sub-val">${sss.radiculopathy}</div><div class="sss-sub-max">/3</div><div class="sss-sub-lbl">Radiculopathy</div></div>
-          <div class="sss-sub-item"><div class="sss-sub-val">${sss.odi}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">ODI</div></div>
-          <div class="sss-sub-item"><div class="sss-sub-val">${sss.bmiScore}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">BMI Load</div></div>
-          <div class="sss-sub-item"><div class="sss-sub-val">${sss.chronicity}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">Chronicity</div></div>
-        </div>
-        <div class="sss-total-row" style="background:${sss.bg}">
+      <!-- RISK HERO -->
+      <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:0 2px">Back pain risk score</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow)">
+        <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
           <div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:${sss.col};opacity:.7;font-weight:700;margin-bottom:4px">Spine Severity Score</div>
-            <div class="sss-total-num" style="color:${sss.col}">${sss.total}<span style="font-size:20px;font-weight:500">/11</span></div>
+            <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">Overall risk</div>
+            <div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-2px;color:${sc.riskCol}">${sc.risk}<span style="font-size:20px;font-weight:500;opacity:.6">/100</span></div>
+          </div>
+          <div style="background:${sc.riskCol};color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700">${sc.riskLvl}</div>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
+          <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${sc.risk}%;background:${sc.riskCol};border-radius:3px;transition:width .6s"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text3);flex-shrink:0">${sc.risk}th percentile</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border)">
+          ${[['Low','0–34','var(--green)',sc.risk<35],['Moderate','35–64','var(--amber)',sc.risk>=35&&sc.risk<65],['High','65–100','var(--red)',sc.risk>=65]].map(([l,r,c,active])=>`
+          <div style="padding:8px;text-align:center;border-right:1px solid var(--border);${active?'background:'+sc.riskBg:''}">
+            <div style="width:6px;height:6px;border-radius:50%;background:${c};margin:0 auto 4px;${active?'outline:2px solid '+c+';outline-offset:2px':''}"></div>
+            <div style="font-size:10px;font-weight:${active?'700':'500'};color:${active?c:'var(--text3)'};">${l}</div>
+            <div style="font-size:9px;color:var(--text3)">${r}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- DIMENSION RINGS -->
+      <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:0 2px">Lifestyle dimensions</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;box-shadow:var(--shadow)">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Each dimension scored 0–100 · Higher is healthier</div>
+        <div style="display:flex;justify-content:space-between">
+          ${SCORES.map(([l,v,c])=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+            ${ring(v,c)}
+            <span style="font-size:10px;font-weight:600;color:var(--text3);text-align:center">${l}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- SSS CARD -->
+      <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:0 2px">Clinical severity (SSS)</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow)">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border)">
+          ${[['VAS Pain',sss.vas,2],['Radiculopathy',sss.radiculopathy,3],['ODI',sss.odi,2],['BMI Load',sss.bmiScore,2],['Chronicity',sss.chronicity,2]].map(([l,v,mx])=>`
+          <div style="padding:10px 4px;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-size:18px;font-weight:800;color:var(--purple2);line-height:1">${v}</div>
+            <div style="font-size:9px;color:var(--text3)">/${mx}</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;line-height:1.3">${l}</div>
+          </div>`).join('')}
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:${sss.bg}">
+          <div>
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:${sss.col};opacity:.7;font-weight:700;margin-bottom:4px">Total SSS score</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1;color:${sss.col}">${sss.total}<span style="font-size:16px;font-weight:500;opacity:.7">/11</span></div>
           </div>
           <div style="text-align:right">
-            <div class="sss-total-badge" style="background:${sss.col}">${sss.level}</div>
-            <div style="font-size:11px;color:${sss.col};margin-top:6px;max-width:150px;text-align:right;font-weight:500">${sss.mgmt}</div>
+            <div style="background:${sss.col};color:#fff;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:6px">${sss.level}</div>
+            <div style="font-size:11px;color:${sss.col};max-width:140px;text-align:right;line-height:1.4;font-weight:500">${sss.mgmt}</div>
           </div>
         </div>
       </div>
 
-      <div class="big-score-title" style="padding:0 16px">Dimension scores (0–100)</div>
-      <div class="score-rings-row">
-        ${SCORES.map(([l, v, c], i) => `
-        <div class="score-ring-card">
-          ${animRing(v, c, 80, i * 0.1)}
-          <div class="ring-val" style="color:${c}">${v}</div>
-          <div class="ring-lbl">${l}</div>
-        </div>`).join('')}
-      </div>
-
-      <div class="risk-banner-big" style="background:${sc.riskBg};border:1px solid ${sc.riskBdr};color:${sc.riskCol};margin:0 16px 16px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:.7;margin-bottom:4px;font-weight:700">Back Pain Risk Score</div>
-          <div class="risk-num-big">${sc.risk}<span style="font-size:22px;font-weight:700">/100</span></div>
-          <div class="risk-sub-lbl">5-dimension analysis</div>
-        </div>
-        <div class="risk-level-badge" style="background:${sc.riskCol}">${sc.riskLvl}</div>
-      </div>
-
+      <!-- AGE BENCHMARKS -->
       ${bench ? `
-      <div class="card">
-        <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-label">Age benchmark — ${bench.group}</div></div>
-        <div class="contrib-list">${bench.flags.map(f => `
-          <div class="contrib-item"><div class="contrib-dot" style="background:${f.col}"></div>${f.text}</div>`).join('')}
-        </div>
+      <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:0 2px">Age benchmarks · ${bench.group}</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow)">
+        ${bench.flags.map((f,i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;${i<bench.flags.length-1?'border-bottom:1px solid var(--border)':''}">
+          <div style="width:30px;height:30px;border-radius:9px;background:${f.col==='var(--green)'?'var(--green-dim)':f.col==='var(--amber)'?'var(--amber-dim)':'var(--red-dim)'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${f.col==='var(--green)'?'var(--green)':f.col==='var(--amber)'?'var(--amber)':'var(--red)'}" stroke-width="2" stroke-linecap="round">
+              ${f.text.toLowerCase().includes('sit')?'<rect x="3" y="11" width="18" height="7" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>':
+                f.text.toLowerCase().includes('walk')?'<circle cx="12" cy="5" r="2"/><path d="M5 22l3-7 4 4 3-7"/>':
+                f.text.toLowerCase().includes('exercise')||f.text.toLowerCase().includes('activity')?'<path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>':
+                '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>'}
+            </svg>
+          </div>
+          <div style="flex:1;font-size:12px;color:var(--text);line-height:1.4">${f.text}</div>
+          <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0;background:${f.col==='var(--green)'?'var(--green-dim)':f.col==='var(--amber)'?'var(--amber-dim)':'var(--red-dim)'};color:${f.col==='var(--green)'?'var(--green)':f.col==='var(--amber)'?'var(--amber)':'var(--red)'}">${f.col==='var(--green)'?'Healthy':f.col==='var(--amber)'?'Below ideal':'High risk'}</span>
+        </div>`).join('')}
       </div>` : ''}
 
-      <div class="card">
-        <div class="card-hdr"><div class="card-dot" style="background:var(--amber)"></div><div class="card-label">Probable contributors</div></div>
-        <div class="contrib-list">${contribs.map(([t, c]) => `
-          <div class="contrib-item"><div class="contrib-dot" style="background:${c}"></div>${t}</div>`).join('')}
-        </div>
+      <!-- CONTRIBUTORS -->
+      <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:0 2px">Probable contributors</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow)">
+        ${contribs.map(([t,c],i) => `
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 14px;${i<contribs.length-1?'border-bottom:1px solid var(--border)':''}">
+          <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0;margin-top:4px"></div>
+          <div style="flex:1;font-size:12px;color:var(--text);line-height:1.4">${t}</div>
+          <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0;background:${c==='var(--red)'||c==='#EF4444'?'var(--red-dim)':'var(--amber-dim)'};color:${c==='var(--red)'||c==='#EF4444'?'var(--red)':'var(--amber)'}">${c==='var(--red)'||c==='#EF4444'?'High':'Moderate'}</span>
+        </div>`).join('')}
       </div>
 
       <button class="gen-btn" id="gbtn" onclick="genReport()">✦ Generate AI Clinical Report</button>
@@ -193,6 +272,7 @@ function showReport() {
   switchTab('report');
   document.getElementById('tab-report-dot').classList.add('show');
 }
+
 
 // ── AI REPORT ─────────────────────────────────────────────────────
 async function genReport() {
