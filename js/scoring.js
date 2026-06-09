@@ -61,7 +61,7 @@ function score() {
 
   // Mobility
   const tolMap = { normal: 25, mildly_limited: 15, moderately_limited: 8, severely_limited: 0 };
-  s.mobility = Math.round(['sit','stand','walk','stairs','lift'].reduce((a,f) => a + (tolMap[D.fn[f]] || 0), 0));
+  s.mobility = Math.min(100, Math.round(['sit','stand','walk','stairs','lift'].reduce((a,f) => a + (tolMap[D.fn[f]] || 0), 0)));
 
   // Back Pain Risk Score (composite)
   const painInt   = parseFloat(D.pa.intensity) || 0;
