@@ -4,7 +4,7 @@
  */
 
 let currentStep = 0;
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 const API_PROXY_URL = 'https://spineiq-backend.onrender.com/api/generate-report';
 
 const STEP_NAMES = [
