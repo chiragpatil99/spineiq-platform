@@ -123,30 +123,30 @@ function showReport() {
         🚨 <strong>RED FLAG — SSS Score = 11. Urgent specialist evaluation required.</strong>
       </div>` : ''}
 
-      <div class="summary-bar" style="margin-top:12px">
-        <div class="sum-cell"><div class="sum-lbl">Patient</div><div class="sum-val">${D.p.name || '—'}</div></div>
-        <div class="sum-cell"><div class="sum-lbl">Age / BMI</div><div class="sum-val" style="color:${bmiCol(D.p.bmi)}">${D.p.age || '—'} yrs / ${D.p.bmi || '—'}</div></div>
-        <div class="sum-cell"><div class="sum-lbl">Classification</div><div class="sum-val" style="font-size:12px;color:${bmiCol(D.p.bmi)}">${bmiLbl(D.p.bmi) || '—'}</div></div>
-        <div class="sum-cell"><div class="sum-lbl">Occupation</div><div class="sum-val" style="font-size:12px;text-transform:capitalize">${D.oc.type || '—'}</div></div>
+      <div class="summary-row">
+        <div class="sum-chip"><div class="s-lbl">Patient</div><div class="s-val">${D.p.name||'—'}</div></div>
+        <div class="sum-chip"><div class="s-lbl">Age</div><div class="s-val">${D.p.age?D.p.age+' yrs':'—'}</div></div>
+        <div class="sum-chip"><div class="s-lbl">BMI</div><div class="s-val" style="color:${bmiCol(D.p.bmi)}">${D.p.bmi||'—'}</div></div>
+        <div class="sum-chip"><div class="s-lbl">Class</div><div class="s-val" style="font-size:11px;color:${bmiCol(D.p.bmi)}">${bmiLbl(D.p.bmi)||'—'}</div></div>
+        <div class="sum-chip"><div class="s-lbl">Job</div><div class="s-val" style="font-size:11px;text-transform:capitalize">${D.oc.type||'—'}</div></div>
       </div>
 
-      <div class="card">
-        <div class="card-hdr"><div class="card-dot" style="background:${sss.col}"></div><div class="card-label">SSS Score breakdown</div></div>
-        <div class="sss-breakdown">
-          <div class="sss-item"><div class="sss-item-val">${sss.vas}<span style="font-size:10px">/2</span></div><div class="sss-item-lbl">VAS</div></div>
-          <div class="sss-item"><div class="sss-item-val">${sss.radiculopathy}<span style="font-size:10px">/3</span></div><div class="sss-item-lbl">Radiculopathy</div></div>
-          <div class="sss-item"><div class="sss-item-val">${sss.odi}<span style="font-size:10px">/2</span></div><div class="sss-item-lbl">ODI</div></div>
-          <div class="sss-item"><div class="sss-item-val">${sss.bmiScore}<span style="font-size:10px">/2</span></div><div class="sss-item-lbl">BMI</div></div>
-          <div class="sss-item"><div class="sss-item-val">${sss.chronicity}<span style="font-size:10px">/2</span></div><div class="sss-item-lbl">Chronicity</div></div>
+      <div class="sss-score-card">
+        <div class="sss-sub-scores">
+          <div class="sss-sub-item"><div class="sss-sub-val">${sss.vas}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">VAS Pain</div></div>
+          <div class="sss-sub-item"><div class="sss-sub-val">${sss.radiculopathy}</div><div class="sss-sub-max">/3</div><div class="sss-sub-lbl">Radiculopathy</div></div>
+          <div class="sss-sub-item"><div class="sss-sub-val">${sss.odi}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">ODI</div></div>
+          <div class="sss-sub-item"><div class="sss-sub-val">${sss.bmiScore}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">BMI Load</div></div>
+          <div class="sss-sub-item"><div class="sss-sub-val">${sss.chronicity}</div><div class="sss-sub-max">/2</div><div class="sss-sub-lbl">Chronicity</div></div>
         </div>
-        <div style="background:${sss.bg};border:1px solid ${sss.col}33;border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div class="sss-total-row" style="background:${sss.bg}">
           <div>
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:${sss.col};margin-bottom:2px">Total SSS</div>
-            <div style="font-size:38px;font-weight:800;color:${sss.col};line-height:1">${sss.total}<span style="font-size:16px">/11</span></div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:${sss.col};opacity:.7;font-weight:700;margin-bottom:4px">Spine Severity Score</div>
+            <div class="sss-total-num" style="color:${sss.col}">${sss.total}<span style="font-size:20px;font-weight:500">/11</span></div>
           </div>
           <div style="text-align:right">
-            <div style="background:${sss.col};color:#fff;padding:6px 14px;border-radius:16px;font-weight:700;font-size:13px;margin-bottom:4px">${sss.level}</div>
-            <div style="font-size:11px;color:${sss.col};max-width:160px;text-align:right">${sss.mgmt}</div>
+            <div class="sss-total-badge" style="background:${sss.col}">${sss.level}</div>
+            <div style="font-size:11px;color:${sss.col};margin-top:6px;max-width:150px;text-align:right;font-weight:500">${sss.mgmt}</div>
           </div>
         </div>
       </div>
