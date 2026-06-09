@@ -82,7 +82,8 @@ const PAGES = [
 
   // ── STEP 0: Patient Information ────────────────────────────────
   () => `
-  <div class="step-hdr"><div class="step-title">Patient Information</div>
+  <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#6355C7,#4A3F8F)"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+  <div class="step-title">Patient Information</div>
   <div class="step-desc">Core demographic data and anthropometric measurements</div></div>
   <div class="card">
     <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Identity</div></div>
@@ -118,7 +119,8 @@ const PAGES = [
 
   // ── STEP 1: Occupation ─────────────────────────────────────────
   () => `
-  <div class="step-hdr"><div class="step-title">Occupation</div>
+  <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#0B6E56,#00C4A8)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div>
+  <div class="step-title">Occupation</div>
   <div class="step-desc">Professional role and work environment</div></div>
   <div class="card">
     <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Role classification</div></div>
@@ -143,7 +145,8 @@ const PAGES = [
 
   // ── STEP 2: Work Patterns ──────────────────────────────────────
   () => `
-  <div class="step-hdr"><div class="step-title">Work Patterns</div>
+  <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#1558A0,#4090F5)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+  <div class="step-title">Work Patterns</div>
   <div class="step-desc">Daily postural time distribution and physical demands</div></div>
   <div class="card">
     <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Postural time distribution</div></div>
@@ -169,7 +172,8 @@ const PAGES = [
 
   // ── STEP 3: Lifestyle ──────────────────────────────────────────
   () => `
-  <div class="step-hdr"><div class="step-title">Lifestyle Assessment</div>
+  <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#1A6B3C,#30D070)"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+  <div class="step-title">Lifestyle Assessment</div>
   <div class="step-desc">Sleep, physical activity, and daily movement patterns</div></div>
   <div class="card">
     <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Sleep</div></div>
@@ -228,7 +232,8 @@ const PAGES = [
       {id:'oneplus',icon:'🟢',name:'OnePlus'},{id:'other',icon:'◉',name:'Other'}];
     const isConnected = !!googleAccessToken;
     return `
-    <div class="step-hdr"><div class="step-title">Health & Fitness Data</div>
+    <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#8C4E08,#F5A020)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+  <div class="step-title">Health & Fitness Data</div>
     <div class="step-desc">Connect Google Fit for automatic sync or enter manually</div></div>
     <div class="card">
       <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Data source</div></div>
@@ -344,7 +349,8 @@ const PAGES = [
     const odiOpts = [['normal','Normal (0)'],['mild','Mild difficulty (1)'],['severe','Severe difficulty (2)'],['severe3','Severe difficulty (3)']];
     const odiFields = [['walking','Walking'],['sitting','Sitting'],['standing','Standing'],['sleep','Sleep'],['daily','Daily Activities']];
     return `
-    <div class="step-hdr"><div class="step-title">Radiculopathy & Disability</div>
+    <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#4A3F8F,#9080FF)"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+  <div class="step-title">Radiculopathy & Disability</div>
     <div class="step-desc">Leg symptom severity (SSS Section 2) and Modified ODI disability scoring (SSS Section 3)</div></div>
 ` + videoGate('odi',
       'Understanding Nerve Pain & Daily Disability',
@@ -397,7 +403,8 @@ const PAGES = [
     ];
     const anyFlag = Object.values(D.rf).some(v=>v);
     return `
-    <div class="step-hdr"><div class="step-title">Red Flag Screening</div>
+    <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#8B2020,#F04040)"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+  <div class="step-title">Red Flag Screening</div>
     <div class="step-desc">SSS Section 6 — Tick if present. Any red flag automatically sets SSS score to 11 (urgent).</div></div>
 ` + videoGate('redflag',
       'Understanding Red Flags in Back Pain',
@@ -426,7 +433,8 @@ const PAGES = [
     const F=[['sit','Sitting tolerance'],['stand','Standing tolerance'],['walk','Walking capacity'],['stairs','Stair climbing'],['lift','Lifting ability']];
     const O=[['normal','Normal','sel-normal'],['mildly_limited','Mildly limited','sel-mild'],['moderately_limited','Moderately limited','sel-mod'],['severely_limited','Severely limited','sel-severe']];
     return `
-    <div class="step-hdr"><div class="step-title">Functional Assessment</div>
+    <div class="step-hdr"><div class="step-icon-badge" style="background:linear-gradient(135deg,#0B6E56,#00C4A8)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+  <div class="step-title">Functional Assessment</div>
     <div class="step-desc">Current physical capacity across key daily movement patterns</div></div>
     <div class="card">
       ${F.map(([k,l])=>`
