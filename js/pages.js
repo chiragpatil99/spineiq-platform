@@ -125,17 +125,17 @@ const PAGES = [
   <div class="card">
     <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Role classification</div></div>
     <div class="field"><label>Occupation type</label>
-    <select onchange="D.oc.type=this.value;render()">
-      <option value="" ${!D.oc.type?'selected':''}>Select occupation category</option>
-      <option value="office" ${D.oc.type==='office'?'selected':''}>Office Worker — desk-based</option>
-      <option value="field" ${D.oc.type==='field'?'selected':''}>Field Worker — outdoor / site-based</option>
-      <option value="driver" ${D.oc.type==='driver'?'selected':''}>Driver — vehicle operator</option>
-      <option value="homemaker" ${D.oc.type==='homemaker'?'selected':''}>Homemaker / Caregiver</option>
-      <option value="student" ${D.oc.type==='student'?'selected':''}>Student</option>
-      <option value="manual" ${D.oc.type==='manual'?'selected':''}>Manual Labour</option>
-      <option value="healthcare" ${D.oc.type==='healthcare'?'selected':''}>Healthcare Professional</option>
-      <option value="other" ${D.oc.type==='other'?'selected':''}>Other</option>
-    </select></div>
+    <div class="option-grid">
+      ${[['office','💻','Office Worker','Desk-based'],['field','🏗️','Field Worker','Outdoor / site'],
+      ['driver','🚗','Driver','Vehicle operator'],['homemaker','🏠','Homemaker','Caregiver'],
+      ['student','📚','Student','Full / part-time'],['manual','🔧','Manual Labour','Physical work'],
+      ['healthcare','🩺','Healthcare','Medical professional'],['other','⚙️','Other','—']].map(([v,ic,lb,sub])=>`
+      <button class="option-pill ${D.oc.type===v?'sel':''}" onclick="D.oc.type='${v}';render()">
+        <span class="pill-icon">${ic}</span>
+        <span class="pill-label">${lb}</span>
+        <span class="pill-sub">${sub}</span>
+      </button>`).join('')}
+    </div></div>
     ${D.oc.type==='other'?`<div class="field"><label>Specify occupation</label>
     <input type="text" value="${D.oc.other}" placeholder="Describe occupation" oninput="D.oc.other=this.value"></div>`:''}
     ${D.oc.type==='office'||D.oc.type==='student'?`<div class="alert alert-warn">⚠ Desk-based occupations are associated with prolonged static lumbar loading and hip flexor tightening.</div>`:''}
