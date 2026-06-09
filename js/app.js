@@ -79,6 +79,22 @@ function updateActions() {
       : `<button class="btn-next" onclick="showReport()" style="${currentStep === 0 ? 'flex:1' : ''}">View Report ✦</button>`}`;
 }
 
+// ── ANIMATED RING HELPER ──────────────────────────────────────────
+function animRing(val, col, size, delay) {
+  const r = size/2 - 8;
+  const c = 2 * Math.PI * r;
+  const dash = (val/100) * c;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--border)" stroke-width="7"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="7"
+      stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"
+      class="animated-ring"
+      style="--dash:${dash};--gap:${c};--delay:${delay}s"/>
+    <text x="${size/2}" y="${size/2+6}" text-anchor="middle"
+      font-size="18" font-weight="900" fill="${col}" font-family="inherit">${val}</text>
+  </svg>`;
+}
+
 // ── REPORT TAB ────────────────────────────────────────────────────
 function showReport() {
   const sc  = score();
@@ -135,29 +151,23 @@ function showReport() {
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-hdr"><div class="card-dot"></div><div class="card-label">Dimension scores (0–100)</div></div>
-        <div class="score-grid">
-          ${SCORES.map(([l, v, c]) => `
-          <div class="score-cell">
-            <div class="sc-label">${l}</div>
-            <svg width="48" height="48" viewBox="0 0 48 48" style="display:block;margin:0 auto">
-              <circle cx="24" cy="24" r="18" fill="none" stroke="var(--border)" stroke-width="5"/>
-              <circle cx="24" cy="24" r="18" fill="none" stroke="${c}" stroke-width="5"
-                stroke-dasharray="${(v/100)*113} 113" stroke-linecap="round" transform="rotate(-90 24 24)"/>
-              <text x="24" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="${c}" font-family="inherit">${v}</text>
-            </svg>
-            <div class="sc-val" style="color:${c}">${v}</div>
-          </div>`).join('')}
-        </div>
+      <div class="big-score-title" style="padding:0 16px">Dimension scores (0–100)</div>
+      <div class="score-rings-row">
+        ${SCORES.map(([l, v, c], i) => `
+        <div class="score-ring-card">
+          ${animRing(v, c, 80, i * 0.1)}
+          <div class="ring-val" style="color:${c}">${v}</div>
+          <div class="ring-lbl">${l}</div>
+        </div>`).join('')}
       </div>
 
-      <div class="risk-banner" style="background:${sc.riskBg};border:1px solid ${sc.riskBdr}">
+      <div class="risk-banner-big" style="background:${sc.riskBg};border:1px solid ${sc.riskBdr};color:${sc.riskCol};margin:0 16px 16px">
         <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:${sc.riskCol};margin-bottom:2px">Back Pain Risk</div>
-          <div class="risk-score-num" style="color:${sc.riskCol}">${sc.risk}<span style="font-size:18px">/100</span></div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;opacity:.7;margin-bottom:4px;font-weight:700">Back Pain Risk Score</div>
+          <div class="risk-num-big">${sc.risk}<span style="font-size:22px;font-weight:700">/100</span></div>
+          <div class="risk-sub-lbl">5-dimension analysis</div>
         </div>
-        <div class="risk-badge2" style="background:${sc.riskCol};color:#fff">${sc.riskLvl}</div>
+        <div class="risk-level-badge" style="background:${sc.riskCol}">${sc.riskLvl}</div>
       </div>
 
       ${bench ? `
